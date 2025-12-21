@@ -11,20 +11,20 @@ import java.util.Scanner;
 import static util.MyLogger.log;
 
 public class ChatClient {
-    public static void main(String[] args) throws InterruptedException {
-        try (Socket socket = new Socket("localhost", 12345);
-             DataInputStream input = new DataInputStream(socket.getInputStream());
-             DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-        ) {
+    public static void main(String[] args) throws InterruptedException, IOException {
+        try{
+            Socket socket = new Socket("localhost", 12345);
+            DataInputStream input = new DataInputStream(socket.getInputStream());
+            DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+            Session session = new Session(socket, input, output);
 
             log("소켓 연결:" + socket);
-            Session session = new Session(socket, input, output);
-            Thread sender = new Thread(new Sender(session));
-            sender.start();
 
-            while (true) {
-                log("received : " + input.readUTF());
-            }
+            Thread senderThread = new Thread(new Sender(session));
+            Thread receiverThread = new Thread(new Receiver(session));
+            senderThread.start();
+            receiverThread.start();
+
         } catch (IOException e) {
             log(e);
         }
@@ -41,6 +41,10 @@ public class ChatClient {
             this.output = output;
         }
 
+        public DataInputStream getInput() {
+            return input;
+        }
+
         public DataOutputStream getOutput() {
             return output;
         }
@@ -49,6 +53,29 @@ public class ChatClient {
             SocketCloseUtil.closeAll(socket, input, output);
         }
     }
+
+    private static class Receiver implements Runnable {
+        private final Session session;
+
+        private Receiver(Session session) {
+            this.session = session;
+        }
+
+        @Override
+        public void run() {
+            DataInputStream input = session.getInput();
+            try {
+                while (true) {
+                    log("received : " + input.readUTF());
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } finally {
+                session.close();
+            }
+        }
+    }
+
 
     private static class Sender implements Runnable {
         private final Session session;
