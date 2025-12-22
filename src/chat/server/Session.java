@@ -41,7 +41,7 @@ public class Session implements Runnable{
             log(e);
         } finally {
             sessionManager.remove(this);
-            sessionManager.sendAll(username + "exited");
+            sessionManager.sendAll(username + " exited");
             close();
         }
     }

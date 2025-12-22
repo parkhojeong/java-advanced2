@@ -43,7 +43,7 @@ public class WriteHandler implements Runnable{
                 if(toSend.startsWith("/")){
                     output.writeUTF(toSend);
                 } else {
-                    output.writeUTF("/messsage" + DELIMITER + toSend);
+                    output.writeUTF("/message" + DELIMITER + toSend);
                 }
             }
         } catch (IOException | NoSuchElementException e) {
