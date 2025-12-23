@@ -14,12 +14,9 @@ import java.util.Map;
 
 public class AnnotationServlet implements HttpServlet {
 
-    private final List<Object> controllers;
     private final Map<String, ControllerMethod> pathMap = new HashMap<>();
 
     public AnnotationServlet(List<Object> controllers) {
-        this.controllers = controllers;
-
         initPathMap(controllers);
     }
 
