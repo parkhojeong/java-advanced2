@@ -15,7 +15,7 @@ import java.util.Map;
 public class AnnotationServlet implements HttpServlet {
 
     private final List<Object> controllers;
-    private final Map<String, Object[]> pathMap = new HashMap<>();
+    private final Map<String, ControllerMethod> pathMap = new HashMap<>();
 
     public AnnotationServlet(List<Object> controllers) {
         this.controllers = controllers;
@@ -23,20 +23,29 @@ public class AnnotationServlet implements HttpServlet {
         initPathMap(controllers);
     }
 
+    private static class ControllerMethod {
+        private final Object controller;
+        private final Method method;
+
+        private ControllerMethod(Object controller, Method method) {
+            this.controller = controller;
+            this.method = method;
+        }
+    }
+
     private void initPathMap(List<Object> controllers) {
         for (Object controller : controllers) {
             Class<?> aClass = controller.getClass();
             Method[] methods = aClass.getDeclaredMethods();
             for (Method method : methods) {
-
-                Mapping mapping = method.getAnnotation(Mapping.class);
-                if(mapping == null) {
-                    continue;
+                if(method.isAnnotationPresent(Mapping.class)) {
+                    String path = method.getAnnotation(Mapping.class).value();
+                    if (pathMap.get(path) != null) {
+                        ControllerMethod controllerMethod = pathMap.get(path);
+                        throw new IllegalStateException("duplicate mapping path=" + path + ", controller=" + controllerMethod.controller.getClass() + ", method=" + controllerMethod.method);
+                    }
+                    pathMap.put(path, new ControllerMethod(controller, method));
                 }
-                if(pathMap.get(mapping.value()) != null) {
-                    throw new IllegalArgumentException("duplicate mapping path=" + mapping.value());
-                }
-                pathMap.put(mapping.value(), new Object[]{controller, method});
             }
         }
     }
@@ -45,12 +54,12 @@ public class AnnotationServlet implements HttpServlet {
     public void service(HttpRequest request, HttpResponse response) throws IOException {
         String path = request.getPath();
 
-        Object[] result = pathMap.get(path);
-        if(result == null) {
+        ControllerMethod controllerMethod = pathMap.get(path);
+        if(controllerMethod == null) {
             throw new PageNotFoundException("request=" + path);
         }
 
-        invoke(result[0], (Method) result[1], request, response);
+        invoke(controllerMethod.controller, controllerMethod.method, request, response);
     }
 
     private static void invoke(Object controller, Method method, HttpRequest request, HttpResponse response) {
