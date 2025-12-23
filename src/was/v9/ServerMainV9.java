@@ -6,6 +6,7 @@ import was.httpserver.ServletManager;
 import was.httpserver.servlet.DiscardServlet;
 import was.httpserver.servlet.annotation.AnnotationServlet;
 import was.httpserver.servlet.annotation.AnnotationServletV2;
+import was.httpserver.servlet.annotation.AnnotationServletV3;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,7 +16,7 @@ public class ServerMainV9 {
 
     public static void main(String[] args) throws IOException {
         List<Object> controllers = List.of(new SiteControllerV9(), new SearchControllerV9());
-        HttpServlet annotationServlet = new AnnotationServlet(controllers);
+        HttpServlet annotationServlet = new AnnotationServletV3(controllers);
 
         ServletManager servletManager = new ServletManager();
         servletManager.setDefaultServlet(annotationServlet);
