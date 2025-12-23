@@ -1,6 +1,7 @@
 package was.v7;
 
 import was.httpserver.HttpServer;
+import was.httpserver.HttpServlet;
 import was.httpserver.ServletManager;
 import was.httpserver.servlet.DiscardServlet;
 import was.httpserver.servlet.annotation.AnnotationServlet;
@@ -14,11 +15,10 @@ public class ServerMainV7 {
 
     public static void main(String[] args) throws IOException {
         List<Object> controllers = List.of(new SiteControllerV7(), new SearchControllerV7());
-        AnnotationServlet annotationServlet = new AnnotationServlet(controllers);
+        HttpServlet annotationServlet = new AnnotationServlet(controllers);
 
         ServletManager servletManager = new ServletManager();
         servletManager.setDefaultServlet(annotationServlet);
-        servletManager.add("/", new HomeServlet());
         servletManager.add("/favicon.ico", new DiscardServlet());
 
         HttpServer server = new HttpServer(PORT, servletManager);
