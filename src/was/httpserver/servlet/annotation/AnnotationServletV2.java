@@ -10,11 +10,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-public class AnnotationServlet implements HttpServlet {
+public class AnnotationServletV2 implements HttpServlet {
 
     private final List<Object> controllers;
 
-    public AnnotationServlet(List<Object> controllers) {
+    public AnnotationServletV2(List<Object> controllers) {
         this.controllers = controllers;
     }
 
