@@ -21,6 +21,10 @@ public class BasicData {
         return string + " hello";
     }
 
+    private void privateMethod() {
+        System.out.println("BasicData.privateMethod");
+    }
+
     void defaultMethod() {
         System.out.println("BasicData.defaultMethod");
     }
