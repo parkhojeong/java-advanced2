@@ -8,6 +8,7 @@ import was.httpserver.PageNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 
 public class AnnotationServlet implements HttpServlet {
@@ -34,13 +35,27 @@ public class AnnotationServlet implements HttpServlet {
                 }
 
                 if (path.equals(mapping.value())) {
-                    invoke(controller, method, request, response);
-                    return;
+                    Class<?>[] parameterTypes = method.getParameterTypes();
+                    if(parameterTypes.length == 2 && parameterTypes[0] == HttpRequest.class && parameterTypes[1] == HttpResponse.class) {
+                        invoke(controller, method, request, response);
+                        return;
+                    } else if (parameterTypes.length == 1 && parameterTypes[0] == HttpResponse.class) {
+                        invoke(controller, method, response);
+                        return;
+                    }
                 }
             }
         }
 
         throw new PageNotFoundException("request=" + path);
+    }
+
+    private void invoke(Object controller, Method method, HttpResponse response) {
+        try {
+            method.invoke(controller, response);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void invoke(Object controller, Method method, HttpRequest request, HttpResponse response) {
