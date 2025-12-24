@@ -17,6 +17,10 @@ public class HttpRequest {
     public HttpRequest(BufferedReader reader) throws IOException {
         parseRequestLine(reader);
         parseHeaders(reader);
+
+        if("POST".equals(method) && "application/x-www-form-urlencoded".equals(headers.get("Content-Type"))){
+            parseBodyParameters(reader);
+        }
     }
 
     // GET /search?q=java HTTP/1.1
@@ -62,6 +66,17 @@ public class HttpRequest {
         while(!(line = reader.readLine()).isEmpty()){
             String[] header = line.split(": ");
             headers.put(header[0], header[1]);
+        }
+    }
+
+    private void parseBodyParameters(BufferedReader reader) throws IOException {
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        char[] body = new char[contentLength];
+        reader.read(body, 0, contentLength);
+        String[] split = new String(body).split("&");
+        for (String param : split) {
+            String[] keyValue = param.split("=");
+            queryParameters.put(keyValue[0], keyValue[1]);
         }
     }
 
