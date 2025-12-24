@@ -8,11 +8,42 @@ import was.httpserver.servlet.annotation.Mapping;
 
 import java.util.List;
 
+import static util.MyLogger.log;
+
 public class MemberController {
     final MemberRepository memberRepository;
 
     public MemberController(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
+    }
+
+    @Mapping("/")
+    public void home(HttpResponse response) {
+        String str = "<html>"
+                + "<body>" +
+                "<h1>Member manager</h1>" +
+                "<ul>" +
+                "<li><a href='/add-member'>join</a></li>" +
+                "<li><a href='/users'>user list</a></li>" +
+                "</ul>" +
+                "</body>"
+                + "</html>";
+        response.writeBody(str);
+    }
+
+    @Mapping("/add-member")
+    public void addMember(HttpResponse response) {
+        String body = "<html>"
+                + "<body>" +
+                "<form action='/join' method='post'>" +
+                "<input type='text' name='id'>" +
+                "<input type='text' name='name'>" +
+                "<input type='text' name='age'>" +
+                "<input type='submit' value='join'>" +
+                "</form>" +
+                "</body>"
+                + "</html>";
+        response.writeBody(body);
     }
 
     @Mapping("/join")
